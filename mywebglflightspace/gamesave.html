@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+ gamesave a program  by NGUYEN.Chung (freeware 2015) <br />
+<head>
+<title>game save test</title>
+<meta charset="utf-8">
+</head>
+<body>
+<button id="load"  onclick="subload();">load</button>
+<button id="save"  onclick="subsave();">save</button>
+<button id="delete"  onclick="subdelete();">delete</button>
+<button id="quit"  onclick="gamesavequit=1;">quit</button>
+<br/><br/>
+<div id="gamesave">
+<input type="checkbox" id="save0check" name="gamesave" value="new" />new 
+<input type="text" id="save0text" name="gamesavetext" value="newname" size=47 />
+<input type="text" id="save0date" name="gamesavedate" value="date" size=20 /><br/>
+</div>
+<script>
+document.getElementById("save0text").value="my game save new";
+document.getElementById("save0date").value=new Date().toLocaleString();
+document.getElementById("save0check").check=true;
+var ngamesave=30,igamesave=0,gamesavequit=0;
+var element=[],elementtext=[],elementdate=[],elementbr=[];
+function formattext(text,letters){
+    var word="",w="";
+	for(var i=0;i<text.length;i++){
+		w=text.substr(i,1);
+		if(letters.indexOf(w)>=0){word+="?";}else{word+=w;}
+	}
+	return word;
+}
+function datetime(){return new Date().toLocaleString();}
+function addelement(name,datetext){
+var name2=formattext(name,"#&");
+if(igamesave>=ngamesave-1){return;}
+igamesave+=1;var i=igamesave;
+element[i] = document.createElement("input");
+element[i].type="checkbox";element[i].name="gamesave";
+element[i].value="save"+i;
+elementtext[i] = document.createElement("input");
+elementtext[i].type="text";elementtext[i].name="gamesavetext";
+elementtext[i].value=name2;elementtext[i].size=53;
+elementdate[i] = document.createElement("input");
+elementdate[i].type="text";elementdate[i].name="datetext";
+elementdate[i].value=datetext;elementdate[i].size=20;
+elementbr[i]=document.createElement("br");
+document.getElementById("gamesave").appendChild(element[i]);
+document.getElementById("gamesave").appendChild(elementtext[i]);
+document.getElementById("gamesave").appendChild(elementdate[i]);
+document.getElementById("gamesave").appendChild(elementbr[i]);
+}
+function removeelement(i){
+document.getElementById("gamesave").removeChild(element[i]);
+document.getElementById("gamesave").removeChild(elementtext[i]);
+document.getElementById("gamesave").removeChild(elementdate[i]);
+document.getElementById("gamesave").removeChild(elementbr[i]);
+}
+function removeallelement(){
+for(var i=1;i<ngamesave;i++){try{removeelement(i);}catch(e){}}
+}
+/*addelement("my game&# save 1",datetime());
+/*addelement("my game&# save 2",datetime());
+addelement("my game save 3",datetime());
+removeelement(1);
+//removeallelement();
+addelement("my game save 4",datetime());
+alert(document.getElementById("gamesave").children[4].value);
+*/
+var newgamename="new gamesave",newgamedata="",gamedata=[],tgamesave=0;
+function initgamesave(name,data){
+if(!localStorage){alert("no html5 localStorage support on this browser !");return;}
+newgamename=formattext(name,"#&").trim();
+newgamedata=data;
+gamesavequit=0;tgamesave=1;gamereturndata=null;
+if(newgamename==""){newgamename="new gamesave"}
+removeallelement();
+document.getElementById("save0text").focus();
+document.getElementById("save0text").value=newgamename;
+document.getElementById("save0date").value=new Date().toLocaleString();
+igamesave=0;
+for(var i=1;i<ngamesave;i++){
+   var name1=localStorage.getItem("gamesavename"+i);
+   var date1=localStorage.getItem("gamesavedate"+i);
+   var data1=localStorage.getItem("gamesavedata"+i);
+   if(name1!=null && date1==null){date1=datetime();
+      localStorage.setItem("gamesavedate"+i,date1);}
+   if(name1!=null && date1!=null){name1=name1.trim();
+                                  if(name1==""){name1="?";}
+								  addelement(name1,date1);
+								  //igamesave+=1; done in addelement
+								  gamedata[igamesave]=data1;
+   }else{break;}							  
+}
+//addelement("my game&# save 1",datetime());
+}
+var igamecheck=0;
+function testgamecheck(){
+var test=0;
+for(var i=0;i<ngamesave;i++){
+   if(document.getElementById("gamesave").children[4*i]){
+      if(document.getElementById("gamesave").children[4*i].checked){
+	     test=1;
+		 if(i!=igamecheck){gameuncheck(igamecheck);igamecheck=i;}}}
+}
+if(test==0){igamecheck=0;gamesetcheck(0);}
+}
+function gamesetcheck(i){
+   if(document.getElementById("gamesave").children[4*i]){
+      document.getElementById("gamesave").children[4*i].checked=true;}
+}
+function gameuncheck(i){
+   if(document.getElementById("gamesave").children[4*i]){
+      document.getElementById("gamesave").children[4*i].checked=false;}
+}
+function cleargamecheck(){
+for(var i=0;i<ngamesave;i++){gameuncheck(i);}
+}
+var gamereturndata=null;
+function loopgamesave(){
+   testgamecheck();
+   if(gamesavequit==0){setTimeout("loopgamesave();",300);}
+   else{alert("bye "+igamecheck+"  "+igamesave);
+        removeallelement();
+        if(gamereturndata!=null){alert(gamereturndata);}
+        tgamesave=0;}
+}
+function subload(){
+alert(igamecheck+"  "+igamesave);
+if(igamecheck==0){gamesavequit=1;return;}
+if(confirm("load gamesave "+igamecheck+" ?")){
+   gamereturndata=gamedata[igamecheck];
+   gamesavequit=1;}
+}
+function subsave(){
+alert(igamecheck+"  "+igamesave);
+if(igamecheck==0){
+   var name=document.getElementById("save0text").value.trim();
+   if(name==""){name="?";}
+   if(igamesave>=ngamesave-1){alert("max "+ngamesave+"gamesaves !");}
+   else{igamesave+=1;localStorage.setItem("gamesavename"+igamesave,name);
+        localStorage.setItem("gamesavedate"+igamesave,datetime());
+        localStorage.setItem("gamesavedata"+igamesave,newgamedata);
+        gamesavequit=1;}
+}else if(confirm("write over gamesave "+igamecheck+" ?")){
+   var name=document.getElementById("save0text").value.trim();
+   if(name==""){name="?";}
+   localStorage.setItem("gamesavename"+igamecheck,name);
+   localStorage.setItem("gamesavedate"+igamecheck,datetime());
+   localStorage.setItem("gamesavedata"+igamecheck,newgamedata);
+   gamesavequit=1;}
+}
+function subdelete(){
+alert("delete "+igamecheck+"  "+igamesave);
+if(igamecheck==0){gamesavequit=1;return;}
+if(confirm("delete gamesave "+igamecheck+" ?")){
+   var i=igamecheck;
+   for(var j=i;j<ngamesave-1;j++){
+     if(localStorage.getItem("gamesavename"+(j+1))!=null){
+	   localStorage.setItem("gamesavename"+j,localStorage.getItem("gamesavename"+(j+1)));
+       localStorage.setItem("gamesavedate"+j,localStorage.getItem("gamesavedate"+(j+1)));
+       localStorage.setItem("gamesavedata"+j,localStorage.getItem("gamesavedata"+(j+1)));	   
+	   i=j+1;
+	 }else{break;}
+   }
+   localStorage.removeItem("gamesavename"+i);
+   localStorage.removeItem("gamesavedate"+i);
+   localStorage.removeItem("gamesavedata"+i);
+   igamesave-=1;
+   gamesavequit=1;}
+
+}
+initgamesave("my new game","my new gamedata");
+loopgamesave();
+</script>
+</body>
+</html>
